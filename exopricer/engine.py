@@ -1,5 +1,6 @@
 import numpy as np
 import time
+from collections import defaultdict
 
 def MonteCarlo(product):
     time0 = time.time()
@@ -24,7 +25,7 @@ def MonteCarlo(product):
     params_mc = params.copy()
     undl_spots = []
     for undl in product.undls:
-        undl_spot = md.spot[undl]
+        undl_spot = md.underlying[undl].spot
         undl_spots.append(undl_spot)
         params_mc[undl] = [undl_spot] * (datenumber+1)
     price = 0
@@ -35,6 +36,7 @@ def MonteCarlo(product):
         rndi = rnds.getrnd()
         p_res = 0
         KO_flag = False
+        payoff.rt_duplicate = defaultdict(int)
 
         for di in range(1, datenumber+1):
             # diffusion
@@ -42,7 +44,7 @@ def MonteCarlo(product):
                 old = params_mc[undl][di-1]
                 moneyness = old / undl_spots[ui]
                 vol = config.vol.calculate(undl, moneyness, di)
-                div = md.div[undl]
+                div = md.underlying[undl].div
                 new = old * np.exp((md.r - div - 0.5*vol*vol)*dt + vol*sqrtdt*rndi[ui,di-1])
                 params_mc.update(undl, new, di)
 
@@ -50,7 +52,13 @@ def MonteCarlo(product):
             todayevents = product.payoff[di]
             if todayevents:
                 for event in todayevents:
-                    res = event(params_mc, di)
+                    if payoff.duplicate[event.__name__]>1:
+                        ei = payoff.rt_duplicate[event.__name__]
+                        res = event(params_mc, di, ei)
+                        payoff.rt_duplicate[event.__name__] += 1
+                    else:
+                        res = event(params_mc, di)
+
                     if isinstance(res, tuple):
                         res, consequence = res
                         if consequence == "KO":
@@ -66,8 +74,6 @@ def MonteCarlo(product):
     print(f"finish pricing with time {time.time()-time0}")
     return price
 
-def random():
-    pass
 
 class RandomNumbers():
     def __init__(self, d, n, p, method="numpy", antithetic=False):
@@ -97,3 +103,5 @@ class RandomNumbers():
         end = (self.curd+1) * self.n
         self.curd += 1
         return self.rnd[start:end]
+
+

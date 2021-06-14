@@ -20,11 +20,10 @@ md.simple_update("S", type="Share", spot=100, vol=0.3, div=0.01)
 md.r = 0.02
 p.marketdata = md
 
-#### Config
+#### Config, default: MonteCarlo, dt = 1/256
 c = exo.Config()
 c.path = 50000
 c.antithetic = True
-c.engine = "MonteCarlo"
 p.config = c
 
 #### pricing

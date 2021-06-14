@@ -15,7 +15,7 @@ class Vol(engine):
     def construct(self, md, undls):
         if self.type == "Const":
             for undl in undls:
-                self.model[undl] = lambda M, T: md.vol[undl]
+                self.model[undl] = lambda M, T: md.underlying[undl].vol
 
     def calculate(self, undl, M, T):
         return self.model[undl](M, T)
@@ -53,5 +53,5 @@ class Config():
 
         self.dt = 1/256
         self.path = 10000
-        self.engine = None
+        self.engine = "MonteCarlo"
         self.antithetic = True # much more efficient than I originally thought
