@@ -1,12 +1,13 @@
 import numpy as np
 
-class engine:
+
+class Engine:
     def __init__(self):
-        self.type = None # Const, T, ST
+        self.type = None  # Const, T, ST
         self.model = None
 
 
-class Vol(engine):
+class Vol(Engine):
     def __init__(self, typename):
         super(Vol, self).__init__()
         self.type = typename
@@ -21,7 +22,7 @@ class Vol(engine):
         return self.model[undl](M, T)
 
 
-class Discount(engine):
+class Discount(Engine):
     def __init__(self, typename):
         super(Discount, self).__init__()
         self.type = typename
@@ -34,24 +35,48 @@ class Discount(engine):
         return self.model(M, T)
 
 
-class Forward(engine):
+class Forward(Engine):
     def __init__(self, typename):
         super(Forward, self).__init__()
 
 
-class Forex(engine):
+class Forex(Engine):
     def __init__(self, typename):
         super(Forex, self).__init__()
 
 
-class Config():
+class Config:
     def __init__(self, v="Const", d="Const", fwd="Const", fx="Const"):
         self.vol = Vol("Const")
         self.discount = Discount("Const")
         self.forward = Forward("Const")
         self.forex = Forex("Const")
+        self.with_delta = False
+        self.with_gamma = False
+        self.with_vega = False
+        self.with_theta = False
 
         self.dt = 1/256
         self.path = 10000
         self.engine = "MonteCarlo"
         self.antithetic = True # much more efficient than I originally thought
+
+    def with_greeks(self, items=None, all=False):
+        if all:
+            self.with_delta = True
+            self.with_gamma = True
+            self.with_vega = True
+            self.with_theta = True
+            return
+        if isinstance(items, str):
+            items = [items]
+        for item in items:
+            if item == "delta":
+                self.with_delta = True
+            if item == "gamma":
+                self.with_gamma = True
+            if item == "vega":
+                self.with_vega = True
+            if item == "theta":
+                self.with_theta = True
+

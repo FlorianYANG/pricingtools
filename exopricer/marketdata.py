@@ -12,6 +12,11 @@ class Share(Underlying):
         self.div = div
         self.cor = cor
 
+    def __copy__(self):
+        new = Share(self.name, self.spot, self.vol, self.div, self.cor)
+        return new
+
+
 
 class MarketData:
     def __init__(self):
@@ -34,3 +39,10 @@ class MarketData:
             for k, v in kwargs["cor"]:
                 self.underlying[undl].cov[k] = v
                 self.underlying[k].cov[undl] = v
+
+    def __copy__(self):
+        new_marketdata = MarketData()
+        new_marketdata.r = self.r
+        for underlying in self.underlying.keys():
+            new_marketdata.underlying[underlying] = self.underlying[underlying].__copy__()
+        return new_marketdata
