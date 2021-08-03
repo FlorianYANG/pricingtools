@@ -248,4 +248,3 @@ if __name__ == "__main__":
     for i in range(5):
         print(yeardiff(start, end, i))
 
-    t = 1

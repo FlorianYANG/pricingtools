@@ -1,33 +1,35 @@
 import exopricer as exo
 
-p = exo.Product()
+product = exo.Product()
 
 #### payoff
-def call(params, date):
-    S = params.get("S", date)
-    K = params.get("K")
+def call(p, date):
+    S = p.S[date]
+    K = p.K
     c = max(S-K, 0)
     return c  # payoff, KO
-p.payoff.add(30, call) # today = 0
+product.payoff.add(30, call) # today = 0
 
 #### Params
-params = {"K": 100}
-p.params.add(params)
+params = product.params
+params.K = 100
 
 #### Market Data
 md = exo.MarketData()
 md.simple_update("S", type="Share", spot=100, vol=0.3, div=0.01)
 md.r = 0.02
-p.marketdata = md
+product.marketdata = md
+product.underlyings = ["S"]
 
 #### Config, default: MonteCarlo, dt = 1/256
-c = exo.Config()
-c.path = 50000
+c = product.config
+c.path = 200000
 c.antithetic = True
-p.config = c
+# c.with_greeks(all=True)
+
 
 #### pricing
-p.build(["S"])
-res = p.price()
 
-print(res)
+product.price()
+
+print(product.result)
