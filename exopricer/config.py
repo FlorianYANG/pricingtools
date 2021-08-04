@@ -45,12 +45,37 @@ class Forex(Engine):
         super(Forex, self).__init__()
 
 
+class Correl(Engine):
+    def __init__(self, typename):
+        super().__init__()
+        self.type = typename
+
+    def construct(self, md, undls):
+        if self.type == "Const":
+            n = len(undls)
+            cor_matrix = np.identity(n)
+            for i in range(0,n-1):
+                for j in range(i+1,n):
+                    cor = md.underlying[undls[i]].cor[undls[j]]
+                    cor_matrix[i][j] = cor_matrix[j][i] = cor
+            # need lower triangle matrix
+            try:
+                decomp_matrix = np.linalg.cholesky(cor_matrix)
+            except Exception as error:
+                raise error
+                # how to handle?
+            self.model = lambda T: decomp_matrix
+
+    def calculate(self, T):
+        return self.model(T)
+
 class Config:
     def __init__(self, v="Const", d="Const", fwd="Const", fx="Const"):
         self.vol = Vol("Const")
         self.discount = Discount("Const")
         self.forward = Forward("Const")
         self.forex = Forex("Const")
+        self.correl = Correl("Const")
         self.with_delta = False
         self.with_gamma = False
         self.with_vega = False

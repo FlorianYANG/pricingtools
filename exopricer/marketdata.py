@@ -10,7 +10,10 @@ class Share(Underlying):
         self.spot = spot
         self.vol = vol
         self.div = div
-        self.cor = cor
+        if cor:
+            pass
+        else:
+            self.cor = {}
 
     def __copy__(self):
         new = Share(self.name, self.spot, self.vol, self.div, self.cor)
@@ -36,9 +39,9 @@ class MarketData:
         if "div" in kwargs:
             self.underlying[undl].div = kwargs["div"]
         if "cor" in kwargs:
-            for k, v in kwargs["cor"]:
-                self.underlying[undl].cov[k] = v
-                self.underlying[k].cov[undl] = v
+            for k, v in kwargs["cor"].items():
+                self.underlying[undl].cor[k] = v
+                # self.underlying[k].cor[undl] = v
 
     def __copy__(self):
         new_marketdata = MarketData()
